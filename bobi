@@ -1,0 +1,67 @@
+#include <Servo.h>
+
+// Crear objeto servo
+Servo miServo;
+
+// Definir pines
+const int pinServo = 22;
+const int pinSensorInductivo = 8;
+
+void setup() {
+  // Vincular el objeto servo al pin 22
+  miServo.attach(pinServo);
+  
+  // Configurar el pin del sensor inductivo como entrada
+  pinMode(pinSensorInductivo, INPUT);
+  
+  // Iniciar comunicación serial para debugging
+  Serial.begin(9600);
+  Serial.println("Programa iniciado - Servo funcionando hasta detección");
+}
+
+void loop() {
+  // Leer el estado del sensor inductivo
+  bool objetoDetectado = digitalRead(pinSensorInductivo);
+  
+  if (!objetoDetectado) {
+    // Si no hay detección, mover el servo continuamente
+    moverServo();
+  } else {
+    // Si hay detección, detener el servo
+    miServo.write(0);
+    Serial.println("Objeto detectado - Servo detenido");
+    delay(500); // Pequeña pausa para evitar lecturas erráticas
+  }
+}
+
+void moverServo() {
+  // Mover de 0 a 180 grados
+  for (int angulo = 0; angulo <= 180; angulo++) {
+    // Verificar el sensor antes de cada movimiento
+    if (digitalRead(pinSensorInductivo)) {
+      miServo.write(0);
+      return; // Salir de la función si se detecta un objeto
+    }
+    miServo.write(angulo);
+    Serial.print("Moviendo a ángulo: ");
+    Serial.println(angulo);
+    delay(15);
+  }
+  
+  delay(500);
+  
+  // Mover de 180 a 0 grados
+  for (int angulo = 180; angulo >= 0; angulo--) {
+    // Verificar el sensor antes de cada movimiento
+    if (digitalRead(pinSensorInductivo)) {
+      miServo.write(0);
+      return; // Salir de la función si se detecta un objeto
+    }
+    miServo.write(angulo);
+    Serial.print("Moviendo a ángulo: ");
+    Serial.println(angulo);
+    delay(15);
+  }
+  
+  delay(500);
+}
